@@ -2,4 +2,4 @@
 #include<time.h>
 #include<omp.h>
 
-int main(){}
+int main(){}ff

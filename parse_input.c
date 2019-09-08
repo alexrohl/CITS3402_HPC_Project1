@@ -2,44 +2,59 @@
 // struct from a file
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+/*return an array of the correct size and type*/
+/*• Datatype: ”int” or ”float”
+• Number of rows: An integer n > 0
+• Number of columns: An integer m > 0
+• n × m space-separated integers/floats representing each value*/
 
+/*READ DIRECTLY INTO SPARE MATRIX FORMAT*/
 
-int main(int argc, char* argv[])
+#define MAX_LINE_LEN 256
+#define FALSE 0
+#define TRUE !(FALSE)
+void get_array(char *filename)
 {
-    char const* const fileName = argv[1]; /* should check that argc > 1 */
-    FILE* file = fopen(fileName, "r"); /* should check the result */
-    char line[256];
+    printf("here");
+    int n;
+    int m;
+    int is_int;
 
-    int line_counter = 0
-    while (fgets(line, sizeof(line), file)) {
-        /* note that fgets don't strip the terminating \n, checking its
-           presence would allow to handle lines longer that sizeof(line) */
+    FILE *fp = fopen(filename, "r"); /* should check the result */
+    char type[MAX_LINE_LEN];
 
-        /* Parse type */
-        if (line_counter == 0) {
-          str type = line;
-        }
-        /* Parse num rows and columns */
-        elif (line_counter == 1) {
-          int num_rows = line;
-        }
-        elif (line_counter == 2) {
-          int num_cols = line;
-        }
-        /*Make Matrix...*/
-        else {
-          if (type=="int") {
-            int matrix[num_rows][num_cols] = line;
-          } else {
-            float matrix[num_rows][num_cols] = line;
-          }
-        }
-        /*Parse num_rows and num_columns*/
+    float f_elem;
+    int i_elem;
 
-        printf("%s", line);
+    /*read in type of matrix*/
+    fscanf(fp, "%s", type);
+
+    if (strncmp(type, "int", 3) == 0) {
+      is_int = TRUE;
+    } else {
+      is_int = FALSE;
     }
 
-    fclose(file);
+    /*read in n and m*/
+    fscanf(fp, "%d", &n);
+    fscanf(fp, "%d", &m);
 
-    return 0;
+    int i;
+    int j;
+    printf("bool %d",is_int);
+    if (is_int) {
+        printf(" here");
+      for (i=0; i<n; i++) {
+        for (j=0; j<m; j++) {
+          fscanf(fp,"%d", &i_elem);
+          printf("%d \n", i_elem);
+        }
+      }
+    }
+}
+
+int main() {
+  char file_name[MAX_LINE_LEN] = "int2.in";
+  get_array(file_name);
 }

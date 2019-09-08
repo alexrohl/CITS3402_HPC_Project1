@@ -1,27 +1,30 @@
 #include<stdio.h>
 #include<time.h>
 #include<omp.h>
-
-FILE *ifp, *ofp;
-char *mode = "r";
-char outputFilename[] = "name.out";
-
-FILE ifp = fopen("int1.in", mode);
-
-if (ifp == NULL) {
-  fprintf(stderr, "Can't open input file in.list!\n");
-  exit(1);
-}
-
-ofp = fopen(outputFilename, "w");
-
-if (ofp == NULL) {
-  fprintf(stderr, "Can't open output file %s!\n",
-          outputFilename);
-  exit(1);
-}
+/*Your code will be a simple command-line application that will:
+• Read in up to two dense matrix files
+• Convert this matrix (these matrices) to a suitable sparse format.
+• Perform a single matrix algebra routine specified by command-line
+• Time the whole process and log the results to a file
+• Cleanup all memory usage and terminate*/
 
 /*   ./mysolution.exe -sc -f matrix1.in   */
+
+/*FUN WITH FLAGS*/
+/*Several operators, determines what matrix operation will be performed
+(have been discussed previously)
+– --sm - Scalar multiplication
+– --tr - Trace
+– --ad - Addition
+– --ts - Transpose
+– --mm - Matrix multiplication
+• -f %s (%s) depending on the operation requested, one or more matrix
+files will need to be passed
+– Example: ./mysolution.exe --sm -f matrix1.in
+– Example: ./mysolution.exe --mm -f matrix1.in matrix2.in
+• -t %d Threads. If present specifies the number of execution threads to
+use.
+• -l Log. If present, results will be logged to file*/
 
 int main(int argc,char* argv[])
 {

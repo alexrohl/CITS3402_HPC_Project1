@@ -60,15 +60,6 @@ void get_array(char *filename)
     int i;
     int j;
 
-    /*
-    if ( temp != NULL ) {
-      NNZ=temp;
-    } else {
-      free(NNZ);
-      printf("Error allocating memory!\n");
-    }
-    */
-
     if (is_int) {
       int *NNZ,*temp,*IA,*JA;
 
@@ -168,9 +159,11 @@ void get_array(char *filename)
         printf("%d,", NNZ[i]);
       }
       printf("]\n");
-        /* Free the pointers */
+
+      /* Free the pointers */
       free(NNZ);
-        /* Return success */
+      free(JA);
+      free(IA);
 
     }
 

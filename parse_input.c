@@ -32,8 +32,24 @@ JA = [2, 0, 2]
 #define MAX_LINE_LEN 256
 #define FALSE 0
 #define TRUE !(FALSE)
-void get_array(char *filename)
+
+/*Returns ptr NNZ, its length, ptr IA, its length, ptr JA, its length*/
+/*note the void definition of NNZ since we don't know if it contains ints or floats*/
+struct parsedMatrix {
+    int isInt
+    void *NNZ;
+    int lenNNZ;
+    int *IA;
+    int lenIA;
+    int *JA;
+    int lenJA;
+};
+
+
+struct parsedMatrix get_array(char *filename)
 {
+    struct parsedMatrix result;
+
     int n; /*Number of rows: An integer n > 0*/
     int m; /*Number of columns: An integer m > 0*/
     int is_int;
@@ -140,6 +156,14 @@ void get_array(char *filename)
         /*using temp*/
 
       }
+      result.isInt = is_int;
+      result.NNZ = NNZ;
+      result.lenNNZ = non_zero_counter;
+      result.IA = IA;
+      result.lenIA = n+1;
+      result.JA = JA;
+      result.lenJA =
+
       printf("non zero %d\n",non_zero_counter);
       printf("IA: [");
       for (i=0; i<=n; i++) {
@@ -165,11 +189,13 @@ void get_array(char *filename)
       free(JA);
       free(IA);
 
-    }
+      return result;
 
+    }
 }
 
+/*
 int main() {
   char file_name[MAX_LINE_LEN] = "int3.in";
   get_array(file_name);
-}
+}*/

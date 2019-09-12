@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<time.h>
 #include<omp.h>
+#include"parse_input.c"
 /*Your code will be a simple command-line application that will:
 • Read in up to two dense matrix files
 • Convert this matrix (these matrices) to a suitable sparse format.
@@ -39,5 +40,8 @@ int main(int argc,char* argv[])
         for(counter=0; counter<argc ; counter++)
             printf("\nargv[%d]: %s",counter,argv[counter]);
     }
+    printf("\n");
+
+    struct parsedMatrix Matrix1 = get_array(argv[1]);
     return 0;
 }

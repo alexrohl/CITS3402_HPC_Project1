@@ -16,7 +16,6 @@ bottom)
 • IA: The number of elements in each row. An extra element IA[0] = 0 is
 used by convention. This array can be used to index into the NNZ array
 for each i-th row
-2
 • JA: Stores the column index of each non-zero element.
 For example, the matrix,
 0 0 1
@@ -35,8 +34,7 @@ JA = [2, 0, 2]
 
 /*Returns ptr NNZ, its length, ptr IA, its length, ptr JA, its length*/
 /*note the void definition of NNZ since we don't know if it contains ints or floats*/
-struct parsedMatrix {
-    int isInt
+struct ParsedMatrix {
     void *NNZ;
     int lenNNZ;
     int *IA;
@@ -45,10 +43,18 @@ struct parsedMatrix {
     int lenJA;
 };
 
+typedef struct ParsedMatrix CSRformat;
 
-struct parsedMatrix get_array(char *filename)
+struct MatrixType {
+    int isInt;
+    CSRformat matrix;
+};
+
+
+struct MatrixType get_array(char *filename)
 {
-    struct parsedMatrix result;
+    struct MatrixType result;
+    CSRformat parsed_matrix;
 
     int n; /*Number of rows: An integer n > 0*/
     int m; /*Number of columns: An integer m > 0*/
@@ -156,13 +162,16 @@ struct parsedMatrix get_array(char *filename)
         /*using temp*/
 
       }
+      parsed_matrix.NNZ = NNZ;
+      parsed_matrix.lenNNZ = non_zero_counter;
+      parsed_matrix.IA = IA;
+      parsed_matrix.lenIA = n+1;
+      parsed_matrix.JA = JA;
+      parsed_matrix.lenJA = non_zero_counter;
+
       result.isInt = is_int;
-      result.NNZ = NNZ;
-      result.lenNNZ = non_zero_counter;
-      result.IA = IA;
-      result.lenIA = n+1;
-      result.JA = JA;
-      result.lenJA =
+      result.matrix = parsed_matrix;
+
 
       printf("non zero %d\n",non_zero_counter);
       printf("IA: [");
@@ -185,10 +194,10 @@ struct parsedMatrix get_array(char *filename)
       printf("]\n");
 
       /* Free the pointers */
-      free(NNZ);
+      /* free(NNZ);
       free(JA);
       free(IA);
-
+      */
       return result;
 
     }

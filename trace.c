@@ -22,10 +22,6 @@ The whole is stored as 21 entries.
 IA splits the array NNZ into rows: (10, 20) (30, 40) (50, 60, 70) (80);
 JA aligns values in columns: (10, 20, ...) (0, 30, 0, 40, ...)(0, 0, 50, 60, 70, 0) (0, 0, 0, 0, 0, 80).*/
 
-#define MAX_LINE_LEN 256
-#define FALSE 0
-#define TRUE !(FALSE)
-
 
 /*Assumes we have an integer matrix*/
 int get_int_trace(CSRformat Matrix)
@@ -38,7 +34,7 @@ int get_int_trace(CSRformat Matrix)
   int * intNNZ = (int*)Matrix.NNZ;
 
   //loops through each row
-  for(i=0; i<Matrix.lenIA-1; i++) {
+  for(i=0; i<Matrix.num_rows; i++) {
     printf("row: %d\n",i);
     int first = Matrix.IA[i];
     int last = Matrix.IA[i+1];

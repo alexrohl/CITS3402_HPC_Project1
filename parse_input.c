@@ -29,18 +29,16 @@ JA = [2, 0, 2]
 
 
 #define MAX_LINE_LEN 256
-#define FALSE 0
-#define TRUE !(FALSE)
 
 /*Returns ptr NNZ, its length, ptr IA, its length, ptr JA, its length*/
 /*note the void definition of NNZ since we don't know if it contains ints or floats*/
 struct ParsedMatrix {
-    void *NNZ;
+    int num_rows;
+    int num_columns;
     int lenNNZ;
+    void *NNZ;
     int *IA;
-    int lenIA;
     int *JA;
-    int lenJA;
 };
 
 typedef struct ParsedMatrix CSRformat;
@@ -70,14 +68,16 @@ struct MatrixType get_array(char *filename)
     fscanf(fp, "%s", type);
 
     if (strncmp(type, "int", 3) == 0) {
-      is_int = TRUE;
+      is_int = true;
     } else {
-      is_int = FALSE;
+      is_int = false;
     }
 
     /*read in n and m*/
     fscanf(fp, "%d", &n);
     fscanf(fp, "%d", &m);
+    parsed_matrix.num_rows = n;
+    parsed_matrix.num_columns = m;
 
     int i;
     int j;
@@ -162,12 +162,10 @@ struct MatrixType get_array(char *filename)
         /*using temp*/
 
       }
-      parsed_matrix.NNZ = NNZ;
       parsed_matrix.lenNNZ = non_zero_counter;
+      parsed_matrix.NNZ = NNZ;
       parsed_matrix.IA = IA;
-      parsed_matrix.lenIA = n+1;
       parsed_matrix.JA = JA;
-      parsed_matrix.lenJA = non_zero_counter;
 
       result.isInt = is_int;
       result.matrix = parsed_matrix;
@@ -202,9 +200,3 @@ struct MatrixType get_array(char *filename)
 
     }
 }
-
-/*
-int main() {
-  char file_name[MAX_LINE_LEN] = "int3.in";
-  get_array(file_name);
-}*/

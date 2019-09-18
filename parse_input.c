@@ -46,6 +46,7 @@ typedef struct ParsedMatrix CSRformat;
 struct MatrixType {
     int isInt;
     CSRformat matrix;
+    COO_Format COO_Matrix;
 };
 
 

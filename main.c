@@ -3,9 +3,11 @@ const int false = 0;
 #include<stdio.h>
 #include<time.h>
 #include<omp.h>
+#include"parse_COO.c"
 #include"parse_input.c"
 #include"trace.c"
 #include"addition.c"
+#include"COO_addition.c"
 
 /*Your code will be a simple command-line application that will:
 • Read in up to two dense matrix files
@@ -48,9 +50,13 @@ int main(int argc,char* argv[])
     printf("\n");
 
     struct MatrixType MatrixType1 = get_array(argv[1]);
-    struct MatrixType MatrixType2 = get_array("int20.in");
+    MatrixType1.COO_Matrix = get_COO_Matrix(argv[1]);
+    struct MatrixType MatrixType2 = get_array("int3.in");
+    MatrixType2.COO_Matrix = get_COO_Matrix("int3.in");
     int trace = get_int_trace(MatrixType1.matrix);
     CSRformat added_Matrix = get_addition(MatrixType1.matrix,MatrixType2.matrix);
+    COO_Format added_Matrix2 = get_COO_addition(MatrixType1.COO_Matrix,MatrixType2.COO_Matrix);
+
     printf("Trace: %d\n",trace);
     return 0;
 }

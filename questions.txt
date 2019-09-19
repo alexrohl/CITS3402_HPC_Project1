@@ -1,0 +1,3 @@
+scalar multiple is float or int?
+do the operations need to have the result in the condensed format?
+does run time need to include unpacking condensed version for logging?

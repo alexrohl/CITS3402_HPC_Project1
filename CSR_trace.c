@@ -24,27 +24,28 @@ JA aligns values in columns: (10, 20, ...) (0, 30, 0, 40, ...)(0, 0, 50, 60, 70,
 
 
 /*Assumes we have an integer matrix*/
-int get_int_trace(CSRformat Matrix)
+int get_int_trace(MatrixContainer Matrix)
 {
+  CSR_Format CSR_Matrix = Matrix.CSR_Matrix;
   int sum = 0;
   int i,j;
   int *ith_row;
   int *column_indexs;
   int *temp;
-  int * intNNZ = (int*)Matrix.NNZ;
+  int * intNNZ = (int*)CSR_Matrix.NNZ;
 
   //loops through each row
-  for(i=0; i<Matrix.num_rows; i++) {
+  for(i=0; i<Matrix.n_rows; i++) {
     printf("row: %d\n",i);
-    int first = Matrix.IA[i];
-    int last = Matrix.IA[i+1];
+    int first = CSR_Matrix.IA[i];
+    int last = CSR_Matrix.IA[i+1];
     int column_index;
 
 
     //loops through column_indexs
     for (j=first;j<last;j++) {
       /*Look through column indexes*/
-      column_index = Matrix.JA[j];
+      column_index = CSR_Matrix.JA[j];
       printf("columnIndex: %d\n",column_index);
 
       if (column_index == i) {//found entry on diagonal

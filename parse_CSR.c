@@ -32,32 +32,19 @@ JA = [2, 0, 2]
 
 /*Returns ptr NNZ, its length, ptr IA, its length, ptr JA, its length*/
 /*note the void definition of NNZ since we don't know if it contains ints or floats*/
-struct ParsedMatrix {
-    int num_rows;
-    int num_columns;
+struct CSR_Matrix {
     int lenNNZ;
     void *NNZ;
     int *IA;
     int *JA;
 };
 
-typedef struct ParsedMatrix CSRformat;
-
-struct MatrixType {
-    int isInt;
-    CSRformat matrix;
-    COO_Format COO_Matrix;
-};
+typedef struct CSR_Matrix CSR_Format;
 
 
-struct MatrixType get_array(char *filename)
+CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
 {
-    struct MatrixType result;
-    CSRformat parsed_matrix;
-
-    int n; /*Number of rows: An integer n > 0*/
-    int m; /*Number of columns: An integer m > 0*/
-    int is_int;
+    CSR_Format parsed_matrix;
 
     FILE *fp = fopen(filename, "r"); /* should check the result */
     char type[MAX_LINE_LEN];
@@ -65,25 +52,16 @@ struct MatrixType get_array(char *filename)
     float f_elem;
     int i_elem;
 
-    /*read in type of matrix*/
+    /*skip first 3 reads...*/
     fscanf(fp, "%s", type);
-
-    if (strncmp(type, "int", 3) == 0) {
-      is_int = true;
-    } else {
-      is_int = false;
-    }
-
+    fscanf(fp, "%d", &i_elem);
+    fscanf(fp, "%d", &i_elem);
     /*read in n and m*/
-    fscanf(fp, "%d", &n);
-    fscanf(fp, "%d", &m);
-    parsed_matrix.num_rows = n;
-    parsed_matrix.num_columns = m;
 
     int i;
     int j;
 
-    if (is_int) {
+    if (isInt) {
       int *NNZ,*temp,*IA,*JA;
 
       /* NNZ: The non-zero values stored in row-major order */
@@ -168,10 +146,6 @@ struct MatrixType get_array(char *filename)
       parsed_matrix.IA = IA;
       parsed_matrix.JA = JA;
 
-      result.isInt = is_int;
-      result.matrix = parsed_matrix;
-
-
       printf("non zero %d\n",non_zero_counter);
       printf("IA: [");
       for (i=0; i<=n; i++) {
@@ -197,7 +171,7 @@ struct MatrixType get_array(char *filename)
       free(JA);
       free(IA);
       */
-      return result;
-
     }
+
+    return parsed_matrix;
 }

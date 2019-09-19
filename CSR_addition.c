@@ -23,15 +23,20 @@ JA aligns values in columns: (10, 20, ...) (0, 30, 0, 40, ...)(0, 0, 50, 60, 70,
 
 
 /*Assumes we have an integer matrix*/
-CSRformat get_addition(CSRformat Matrix1, CSRformat Matrix2)
+CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
 {
-  if (Matrix1.num_rows != Matrix2.num_rows || Matrix1.num_columns != Matrix2.num_columns) {
+  if (Matrix1.n_rows != Matrix2.n_rows || Matrix1.m_columns != Matrix2.m_columns) {
     printf("Matrix Dimensions do not Match!\n");
-    CSRformat null;
+    CSR_Format null;
     return null;
   }
+
+  CSR_Format CSR_Matrix1 = Matrix1.CSR_Matrix;
+  CSR_Format CSR_Matrix2 = Matrix2.CSR_Matrix;
+  CSR_Format Result;
+
   int *NNZ,*temp,*IA,*JA;
-  CSRformat Result;
+
   /* NNZ: The non-zero values stored in row-major order */
   NNZ = malloc(sizeof(int));
   /*BUILD IA = [0, 1, 3, 3] the number of elements in each row */
@@ -56,33 +61,33 @@ CSRformat get_addition(CSRformat Matrix1, CSRformat Matrix2)
   }
   /*using temp*/
 
-  int * intNNZ1 = (int*)Matrix1.NNZ;
-  int * intNNZ2 = (int*)Matrix2.NNZ;
+  int * intNNZ1 = (int*)CSR_Matrix1.NNZ;
+  int * intNNZ2 = (int*)CSR_Matrix2.NNZ;
   //Build resulting matrix
   int element_to_add,index_to_add;
   //loops through each row in M1 and M2
   int i;
-  for(i=0; i<Matrix1.num_rows; i++) {
+  for(i=0; i<Matrix1.n_rows; i++) {
     IA_index++;
     printf("row: %d\n",i);
 
-    int first1 = Matrix1.IA[i];
-    int last1 = Matrix1.IA[i+1];
-    int first2 = Matrix2.IA[i];
-    int last2 = Matrix2.IA[i+1];
+    int first1 = CSR_Matrix1.IA[i];
+    int last1 = CSR_Matrix1.IA[i+1];
+    int first2 = CSR_Matrix2.IA[i];
+    int last2 = CSR_Matrix2.IA[i+1];
 
     int j1 = first1;
     int j2 = first2;
 
     while (true) {
-      int column_index1 = Matrix1.JA[j1];
-      int column_index2 = Matrix2.JA[j2];
+      int column_index1 = CSR_Matrix1.JA[j1];
+      int column_index2 = CSR_Matrix2.JA[j2];
       //If matrix1 is spent, add matrix2 remaining elements to Result
       if (j1 == last1) {
         for(j2=j2;j2<last2;j2++) {
           printf("here j2:%d last: %d\n",j2,last2);
           element_to_add = intNNZ2[j2];
-          index_to_add = Matrix2.JA[j2];
+          index_to_add = CSR_Matrix2.JA[j2];
           //append  element and its index to result
           /*append to NNZ*/
           NNZ[non_zero_counter]=element_to_add;
@@ -119,7 +124,7 @@ CSRformat get_addition(CSRformat Matrix1, CSRformat Matrix2)
         for(j1=j1;j1<last1;j1++) {
           printf("here j1:%d last: %d\n",j1,last1);
           element_to_add = intNNZ1[j1];
-          index_to_add = Matrix1.JA[j1];
+          index_to_add = CSR_Matrix1.JA[j1];
           //append  element and its index to result
           /*append to NNZ*/
           NNZ[non_zero_counter]=element_to_add;
@@ -216,9 +221,6 @@ CSRformat get_addition(CSRformat Matrix1, CSRformat Matrix2)
     }
     /*using temp*/
   }
-  //format result
-  Result.num_rows = Matrix1.num_rows;
-  Result.num_columns = Matrix1.num_columns;
   Result.lenNNZ = non_zero_counter;
   Result.NNZ = NNZ;
   Result.IA = IA;
@@ -227,7 +229,7 @@ CSRformat get_addition(CSRformat Matrix1, CSRformat Matrix2)
   printf("ADDING\n");
   printf("non zero %d\n",non_zero_counter);
   printf("IA: [");
-  for (i=0; i<=Matrix1.num_rows; i++) {
+  for (i=0; i<=Matrix1.n_rows; i++) {
     printf("%d,", IA[i]);
   }
   printf("]\n");

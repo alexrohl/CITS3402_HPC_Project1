@@ -3,10 +3,13 @@ const int false = 0;
 #include<stdio.h>
 #include<time.h>
 #include<omp.h>
+#include"array_functions.c"
 #include"parse_COO.c"
-#include"parse_input.c"
-#include"trace.c"
-#include"addition.c"
+#include"parse_CSR.c"
+#include"parse_CSC.c"
+#include"build_matrix_container.c"
+#include"CSR_trace.c"
+#include"CSR_addition.c"
 #include"COO_addition.c"
 
 /*Your code will be a simple command-line application that will:
@@ -49,6 +52,9 @@ int main(int argc,char* argv[])
     }
     printf("\n");
 
+    MatrixContainer matrix_container1 = get_type("int1.in");
+
+    /*
     struct MatrixType MatrixType1 = get_array(argv[1]);
     MatrixType1.COO_Matrix = get_COO_Matrix(argv[1]);
     struct MatrixType MatrixType2 = get_array("int3.in");
@@ -58,5 +64,7 @@ int main(int argc,char* argv[])
     COO_Format added_Matrix2 = get_COO_addition(MatrixType1.COO_Matrix,MatrixType2.COO_Matrix);
 
     printf("Trace: %d\n",trace);
+    */
+    printf("DONE\n");
     return 0;
 }

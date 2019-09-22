@@ -24,6 +24,7 @@ struct COO_Matrix {
     void * values;
     int * column_indices;
     int * row_indices;
+    double time;
 };
 
 typedef struct COO_Matrix COO_Format;
@@ -33,6 +34,8 @@ typedef struct COO_Matrix COO_Format;
 COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
 {
     COO_Format parsed_matrix;
+    clock_t t;
+    t = clock();
 
     FILE *fp = fopen(filename, "r"); /* should check the result */
     char type[MAX_LINE_LEN];
@@ -73,7 +76,6 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
         for (j=0; j<m; j++) {
           /*read element*/
           fscanf(fp,"%d", &i_elem);
-          printf("%d \n", i_elem);
 
           if (i_elem != 0) {
             /*append to values*/
@@ -85,7 +87,7 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
         }
       }
       parsed_matrix.values = values;
-      print_int_array(parsed_matrix.values, non_zero_counter, "values");
+      //print_int_array(parsed_matrix.values, non_zero_counter, "values");
     } else {
       //FOR FLOATS
       printf("Building float COO matrix\n");
@@ -98,7 +100,6 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
 
           /*read element*/
           fscanf(fp,"%f", &f_elem);
-          printf("%f \n", f_elem);
 
           if (f_elem != 0) {
             /*append to values*/
@@ -111,21 +112,25 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
         }
       }
       parsed_matrix.values = float_values;
-      print_float_array(parsed_matrix.values, non_zero_counter, "values");
+      //print_float_array(parsed_matrix.values, non_zero_counter, "values");
     }
 
     parsed_matrix.lenvalues = non_zero_counter;
     parsed_matrix.row_indices = row_indices;
     parsed_matrix.column_indices = column_indices;
-    
-    print_int_array(parsed_matrix.column_indices , non_zero_counter, "column");
-    print_int_array(parsed_matrix.row_indices, non_zero_counter, "rows");
+
+    //print_int_array(parsed_matrix.column_indices , non_zero_counter, "column");
+    //print_int_array(parsed_matrix.row_indices, non_zero_counter, "rows");
 
     /* Free the pointers */
     /* free(values);
     free(column_indices);
     free(row_indices);
     */
+    t = clock() - t;
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+    parsed_matrix.time = time_taken;
+    printf("Time: %f\n",parsed_matrix.time);
     return parsed_matrix;
 
 }

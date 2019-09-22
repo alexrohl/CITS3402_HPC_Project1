@@ -37,6 +37,7 @@ struct CSR_Matrix {
     void *NNZ;
     int *IA;
     int *JA;
+    double time;
 };
 
 typedef struct CSR_Matrix CSR_Format;
@@ -45,6 +46,8 @@ typedef struct CSR_Matrix CSR_Format;
 CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
 {
     CSR_Format parsed_matrix;
+    clock_t t;
+    t = clock();
 
     FILE *fp = fopen(filename, "r"); /* should check the result */
     char type[MAX_LINE_LEN];
@@ -60,118 +63,88 @@ CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
 
     int i;
     int j;
+    int *NNZ,*temp,*IA,*JA;
+
+    /* NNZ: The non-zero values stored in row-major order */
+    NNZ = malloc(sizeof(int));
+    /*BUILD IA = [0, 1, 3, 3] the number of elements in each row */
+    IA = malloc(sizeof(int));
+    /*BUILD JA: Stores the column index of each non-zero element. */
+    JA = malloc(sizeof(int));
+
+    float *float_NNZ;
+    float *float_temp;
+    /* values: The non-zero values stored in row-major order */
+    float_NNZ = malloc(sizeof(float));
+
+    int non_zero_counter = 0;
+    int elements_in_row_counter = 0;
+    int IA_index = 0;
+
+    /*initialise IA*/
+    IA = append_int_to_array(temp, IA, elements_in_row_counter, IA_index);
+    IA_index++;
 
     if (isInt) {
-      int *NNZ,*temp,*IA,*JA;
-
-      /* NNZ: The non-zero values stored in row-major order */
-      NNZ = malloc(sizeof(int));
-      /*BUILD IA = [0, 1, 3, 3] the number of elements in each row */
-      IA = malloc(sizeof(int));
-      /*BUILD JA: Stores the column index of each non-zero element. */
-      JA = malloc(sizeof(int));
-
-      int non_zero_counter = 0;
-      int elements_in_row_counter = 0;
-      int IA_index = 0;
-
-      /*initialise IA*/
-      IA[IA_index] = elements_in_row_counter;
-      temp=realloc(IA,(IA_index+2)*sizeof(int));
-
-      /*using temp*/
-      if ( temp != NULL ) {
-        IA=temp;
-      } else {
-        free(IA);
-        printf("Error allocating memory!\n");
-      }
-      /*using temp*/
-
       for (i=0; i<n; i++) {
-        IA_index++;
         for (j=0; j<m; j++) {
           /* i is our row index*/
           /* j is our column index*/
 
           /*read element*/
           fscanf(fp,"%d", &i_elem);
-          printf("%d \n", i_elem);
 
           if (i_elem != 0) {
             elements_in_row_counter++;
 
-            /*append to NNZ*/
-            NNZ[non_zero_counter]=i_elem;
-            temp=realloc(NNZ,(non_zero_counter+2)*sizeof(int));
-            /*using temp*/
-            if ( temp != NULL ) {
-              NNZ=temp;
-            } else {
-              free(NNZ);
-              printf("Error allocating memory!\n");
-            }
-            /*using temp*/
-
-            /*append to JA*/
-            JA[non_zero_counter]=j;
-            temp=realloc(JA,(non_zero_counter+2)*sizeof(int));
-            /*using temp*/
-            if ( temp != NULL ) {
-              JA=temp;
-            } else {
-              free(JA);
-              printf("Error allocating memory!\n");
-            }
-            /*using temp*/
-
+            NNZ = append_int_to_array(temp, NNZ, i_elem, non_zero_counter);
+            JA = append_int_to_array(temp, JA, j, non_zero_counter);
             non_zero_counter++;
           }
         }
         /*append to IA*/
-        IA[IA_index]=elements_in_row_counter;
-        temp=realloc(IA,(IA_index+2)*sizeof(int));
-        /*using temp*/
-        if ( temp != NULL ) {
-          IA=temp;
-        } else {
-          free(IA);
-          printf("Error allocating memory!\n");
-        }
-        /*using temp*/
+        IA = append_int_to_array(temp, IA, elements_in_row_counter, IA_index);
+        IA_index++;
 
       }
-      parsed_matrix.lenNNZ = non_zero_counter;
       parsed_matrix.NNZ = NNZ;
-      parsed_matrix.IA = IA;
-      parsed_matrix.JA = JA;
+      //print_int_array(parsed_matrix.NNZ , non_zero_counter, "NNZ");
+    } else {
+      //READING FLOATS
+      for (i=0; i<n; i++) {
+        for (j=0; j<m; j++) {
+          /* i is our row index*/
+          /* j is our column index*/
 
-      printf("non zero %d\n",non_zero_counter);
-      printf("IA: [");
-      for (i=0; i<=n; i++) {
-        printf("%d,", IA[i]);
-        j = IA[i];
+          /*read element*/
+          fscanf(fp,"%f", &f_elem);
+
+          if (f_elem != 0.0) {
+            elements_in_row_counter++;
+
+            float_NNZ = append_float_to_array(float_temp, float_NNZ, f_elem, non_zero_counter);
+            JA = append_int_to_array(temp, JA, j, non_zero_counter);
+            non_zero_counter++;
+          }
+        }
+        /*append to IA*/
+        IA = append_int_to_array(temp, IA, elements_in_row_counter, IA_index);
+        IA_index++;
+
       }
-      printf("]\n");
+      parsed_matrix.NNZ = float_NNZ;
+      //print_float_array(parsed_matrix.NNZ , non_zero_counter, "NNZ");
 
-      printf("JA: [");
-      for (i=0; i<j; i++) {
-        printf("%d,", JA[i]);
-      }
-      printf("]\n");
-
-      printf("NNZ: [");
-      for (i=0; i<j; i++) {
-        printf("%d,", NNZ[i]);
-      }
-      printf("]\n");
-
-      /* Free the pointers */
-      /* free(NNZ);
-      free(JA);
-      free(IA);
-      */
     }
+    parsed_matrix.lenNNZ = non_zero_counter;
+    parsed_matrix.IA = IA;
+    parsed_matrix.JA = JA;
+    //print_int_array(parsed_matrix.IA, n, "IA");
+    //print_int_array(parsed_matrix.JA, non_zero_counter, "JA");
 
+    t = clock() - t;
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+    parsed_matrix.time = time_taken;
+    printf("Time: %f\n",parsed_matrix.time);
     return parsed_matrix;
 }

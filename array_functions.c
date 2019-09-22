@@ -58,6 +58,20 @@ float * append_float_to_array(float *temp, float *arr1, float val1, int index){
   return arr1;
 }
 
+void int_swap(int *xp, int *yp)
+{
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+void float_swap(float *xp, float *yp)
+{
+    float temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
 void append_to_arrays(int *temp, int *arr1, int *arr2, int*arr3, int val1, int val2, int val3, int index){
   append_int_to_array(temp,arr1, val1, index);
   append_int_to_array(temp,arr1, val1, index);

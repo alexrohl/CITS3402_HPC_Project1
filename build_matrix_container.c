@@ -62,6 +62,8 @@ MatrixContainer get_type(char *filename)
     //Build other matrix types COO,CSR CSC
     printf("Building COO_matrix for %s\n",filename);
     Result.COO_Matrix = get_COO_Matrix(filename,is_int,n,m);
+    printf("Building CSR_matrix for %s\n",filename);
+    Result.CSR_Matrix = get_CSR_Matrix(filename,is_int,n,m);
 
 
     return Result;

@@ -24,37 +24,53 @@ JA aligns values in columns: (10, 20, ...) (0, 30, 0, 40, ...)(0, 0, 50, 60, 70,
 
 
 /*Assumes we have an integer matrix*/
-int get_int_trace(MatrixContainer Matrix)
+int get_int_trace(MatrixContainer Matrix, int num_threads)
 {
+  clock_t t;
+  t = clock();
   CSR_Format CSR_Matrix = Matrix.CSR_Matrix;
   int sum = 0;
+  int lsum = 0;
   int i,j;
-  int *ith_row;
-  int *column_indexs;
-  int *temp;
   int * intNNZ = (int*)CSR_Matrix.NNZ;
 
-  //loops through each row
-  for(i=0; i<Matrix.n_rows; i++) {
-    printf("row: %d\n",i);
-    int first = CSR_Matrix.IA[i];
-    int last = CSR_Matrix.IA[i+1];
-    int column_index;
+  omp_set_num_threads(num_threads); //I have set the number of threads =4, you can change this.
+  #pragma omp parallel private(lsum)
+  {
+    #pragma omp for
+    //loops through each row
+    for(i=0; i<Matrix.n_rows; i++) {
+      //printf("row: %d\n",i);
+      int first = CSR_Matrix.IA[i];
+      int last = CSR_Matrix.IA[i+1];
+      int column_index;
 
 
-    //loops through column_indexs
-    for (j=first;j<last;j++) {
-      /*Look through column indexes*/
-      column_index = CSR_Matrix.JA[j];
-      printf("columnIndex: %d\n",column_index);
+      //loops through column_indexs
+      for (j=first;j<last;j++) {
+        /*Look through column indexes*/
+        column_index = CSR_Matrix.JA[j];
+        //printf("columnIndex: %d\n",column_index);
+        if (column_index>i) {
+          break;
+        }
 
-      if (column_index == i) {//found entry on diagonal
-        int diagonal_entry = intNNZ[j];
-        printf("Diagonal: %d\n",diagonal_entry);
-        sum += diagonal_entry;
+        if (column_index == i) {//found entry on diagonal
+          int diagonal_entry = intNNZ[j];
+          //printf("Diagonal: %d\n",diagonal_entry);
+          lsum += diagonal_entry;
+        }
       }
     }
+    #pragma omp critical
+        {
+        sum+=lsum;
+        }
   }
+  t = clock() - t;
+  double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+  printf("Time: %f\n",time_taken);
+  printf("Sum: %d\n",sum);
   return sum;
 }
 /*

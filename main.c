@@ -8,6 +8,7 @@ const int false = 0;
 
 #include"parse_COO.c"
 #include"parse_CSR.c"
+#include"COO_transpose.c" //needed to parse CSC...
 #include"parse_CSC.c"
 
 #include"build_matrix_container.c"
@@ -16,7 +17,8 @@ const int false = 0;
 #include"CSR_trace.c"
 #include"CSR_addition.c"
 #include"COO_addition.c"
-#include"COO_transpose.c"
+#include"CSR_CSC_multiply.c"
+
 
 /*Your code will be a simple command-line application that will:
 • Read in up to two dense matrix files
@@ -59,9 +61,14 @@ int main(int argc,char* argv[])
     printf("\n");
 
     MatrixContainer matrix_container1 = get_type(argv[1]);
-    //COO_Format res = get_COO_transpose(matrix_container1);
+    MatrixContainer matrix_container2 = get_type(argv[2]);
+
+    //COO_Format res = get_COO_transpose(matrix_container1,16);
     //CSR_Format res = get_CSR_scalar(matrix_container1,3.141592,4);
-    int res = get_int_trace(matrix_container1,16);
+    //int res = get_int_trace(matrix_container1,16);
+    //CSR_Format res = get_CSR_Addition(get_type("int1.in"),get_type("int2.in"));
+    CSR_Format res1 = get_CSR_CSC_multiply(matrix_container1, matrix_container2);
+
 
     /*
     struct MatrixType MatrixType1 = get_array(argv[1]);

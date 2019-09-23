@@ -30,19 +30,30 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
     CSR_Format null;
     return null;
   }
+  double t;
+  t = omp_get_wtime();
 
   CSR_Format CSR_Matrix1 = Matrix1.CSR_Matrix;
   CSR_Format CSR_Matrix2 = Matrix2.CSR_Matrix;
   CSR_Format Result;
 
-  int *NNZ,*temp,*IA,*JA;
+  int size1 = CSR_Matrix1.lenNNZ;
+  int size2 = CSR_Matrix2.lenNNZ;
+  int num_rows = Matrix1.n_rows;
+
+  int *NNZ,*IA,*JA;
 
   /* NNZ: The non-zero values stored in row-major order */
-  NNZ = malloc(sizeof(int));
+  NNZ = malloc((size1+size2)*sizeof(int));
   /*BUILD IA = [0, 1, 3, 3] the number of elements in each row */
-  IA = malloc(sizeof(int));
+  IA = malloc(num_rows*sizeof(int));
   /*BUILD JA: Stores the column index of each non-zero element. */
-  JA = malloc(sizeof(int));
+  JA = malloc((size1+size2)*sizeof(int));
+
+  float *float_NNZ;
+  float *float_temp;
+  /* values: The non-zero values stored in row-major order */
+  float_NNZ = malloc((size1+size2)*sizeof(float));
 
   int non_zero_counter = 0;
   int elements_in_row_counter = 0;
@@ -50,21 +61,14 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
 
   /*initialise IA*/
   IA[IA_index] = elements_in_row_counter;
-  temp=realloc(IA,(IA_index+2)*sizeof(int));
 
-  /*using temp*/
-  if ( temp != NULL ) {
-    IA=temp;
-  } else {
-    free(IA);
-    printf("Error allocating memory!\n");
-  }
-  /*using temp*/
-
+  //Get integer values
   int * intNNZ1 = (int*)CSR_Matrix1.NNZ;
   int * intNNZ2 = (int*)CSR_Matrix2.NNZ;
+
   //Build resulting matrix
   int element_to_add,index_to_add;
+
   //loops through each row in M1 and M2
   int i;
   for(i=0; i<Matrix1.n_rows; i++) {
@@ -88,30 +92,9 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
           printf("here j2:%d last: %d\n",j2,last2);
           element_to_add = intNNZ2[j2];
           index_to_add = CSR_Matrix2.JA[j2];
-          //append  element and its index to result
-          /*append to NNZ*/
-          NNZ[non_zero_counter]=element_to_add;
-          temp=realloc(NNZ,(non_zero_counter+2)*sizeof(int));
-          /*using temp*/
-          if ( temp != NULL ) {
-            NNZ=temp;
-          } else {
-            free(NNZ);
-            printf("Error allocating memory!\n");
-          }
-          /*using temp*/
 
-          /*append to JA*/
+          NNZ[non_zero_counter]=element_to_add;
           JA[non_zero_counter]=index_to_add;
-          temp=realloc(JA,(non_zero_counter+2)*sizeof(int));
-          /*using temp*/
-          if ( temp != NULL ) {
-            JA=temp;
-          } else {
-            free(JA);
-            printf("Error allocating memory!\n");
-          }
-          /*using temp*/
 
           non_zero_counter++;
           elements_in_row_counter++;
@@ -125,30 +108,9 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
           printf("here j1:%d last: %d\n",j1,last1);
           element_to_add = intNNZ1[j1];
           index_to_add = CSR_Matrix1.JA[j1];
-          //append  element and its index to result
-          /*append to NNZ*/
-          NNZ[non_zero_counter]=element_to_add;
-          temp=realloc(NNZ,(non_zero_counter+2)*sizeof(int));
-          /*using temp*/
-          if ( temp != NULL ) {
-            NNZ=temp;
-          } else {
-            free(NNZ);
-            printf("Error allocating memory!\n");
-          }
-          /*using temp*/
 
-          /*append to JA*/
+          NNZ[non_zero_counter]=element_to_add;
           JA[non_zero_counter]=index_to_add;
-          temp=realloc(JA,(non_zero_counter+2)*sizeof(int));
-          /*using temp*/
-          if ( temp != NULL ) {
-            JA=temp;
-          } else {
-            free(JA);
-            printf("Error allocating memory!\n");
-          }
-          /*using temp*/
 
           non_zero_counter++;
           elements_in_row_counter++;
@@ -179,30 +141,8 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
           j2++;
         }
 
-        //append  element and its index to result
-        /*append to NNZ*/
         NNZ[non_zero_counter]=element_to_add;
-        temp=realloc(NNZ,(non_zero_counter+2)*sizeof(int));
-        /*using temp*/
-        if ( temp != NULL ) {
-          NNZ=temp;
-        } else {
-          free(NNZ);
-          printf("Error allocating memory!\n");
-        }
-        /*using temp*/
-
-        /*append to JA*/
         JA[non_zero_counter]=index_to_add;
-        temp=realloc(JA,(non_zero_counter+2)*sizeof(int));
-        /*using temp*/
-        if ( temp != NULL ) {
-          JA=temp;
-        } else {
-          free(JA);
-          printf("Error allocating memory!\n");
-        }
-        /*using temp*/
 
         non_zero_counter++;
         elements_in_row_counter++;
@@ -211,45 +151,18 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
     }
     //append number_of_elements in row to result
     IA[IA_index]=elements_in_row_counter;
-    temp=realloc(IA,(IA_index+2)*sizeof(int));
-    /*using temp*/
-    if ( temp != NULL ) {
-      IA=temp;
-    } else {
-      free(IA);
-      printf("Error allocating memory!\n");
-    }
-    /*using temp*/
+
   }
   Result.lenNNZ = non_zero_counter;
   Result.NNZ = NNZ;
   Result.IA = IA;
   Result.JA = JA;
 
-  printf("ADDING\n");
-  printf("non zero %d\n",non_zero_counter);
-  printf("IA: [");
-  for (i=0; i<=Matrix1.n_rows; i++) {
-    printf("%d,", IA[i]);
-  }
-  printf("]\n");
+  print_int_array(Result.NNZ, non_zero_counter, "Result");
+  print_int_array(Result.IA, num_rows+1, "IA");
+  print_int_array(Result.JA, non_zero_counter, "JA");
 
-  printf("JA: [");
-  for (i=0; i<non_zero_counter; i++) {
-    printf("%d,", JA[i]);
-  }
-  printf("]\n");
-
-  printf("NNZ: [");
-  for (i=0; i<non_zero_counter; i++) {
-    printf("%d,", NNZ[i]);
-  }
-  printf("]\n");
-
-  /* Free the pointers */
-  /* free(NNZ);
-  free(JA);
-  free(IA);
-  */
+  double time_taken = omp_get_wtime()-t;
+  Result.time = time_taken;
   return Result;
 }

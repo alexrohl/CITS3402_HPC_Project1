@@ -44,8 +44,6 @@ int get_int_trace(MatrixContainer Matrix, int num_threads)
       int first = CSR_Matrix.IA[i];
       int last = CSR_Matrix.IA[i+1];
       int column_index;
-
-
       //loops through column_indexs
       for (j=first;j<last;j++) {
         /*Look through column indexes*/

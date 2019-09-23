@@ -10,31 +10,30 @@
 
 #define MAX_LINE_LEN 256
 //Function that accepts relevant pointers and dynamically appends values to the arrays
-
 /*Assumes we have an integer matrix*/
-COO_Format get_COO_transpose(MatrixContainer Matrix1)
+COO_Format get_COO_transpose(MatrixContainer Matrix1,int num_threads)
 {
-  clock_t t;
-  t = clock();
+  double t;
+  t = omp_get_wtime();
 
   COO_Format Result;
   COO_Format COO_Matrix = Matrix1.COO_Matrix;
   int size = COO_Matrix.lenvalues;
-  /*BUILD row_indices = [0, 1, 3, 3] the number of elements in each row */
-  int row_indices[size];
-  /*BUILD column_indices: Stores the column index of each non-zero element. */
-  int column_indices[size];
 
-  /* values: The non-zero values stored in row-major order */
-  int values[size];
+  int *values,*row_indices,*column_indices;
+  float *float_values;
 
-  /* values: The non-zero values stored in row-major order */
-  float float_values[size];
+  values = malloc( size * sizeof(int) );
+  float_values = malloc( size * sizeof(int) );
+  column_indices = malloc( size * sizeof(int) );
+  row_indices = malloc( size * sizeof(int) );
 
   int non_zero_counter = 0;
 
   int i;
   int j;
+  int changes;
+  omp_set_num_threads(num_threads); //I have set the number of threads =4, you can change this.
 
 
   if (Matrix1.isInt) {
@@ -43,54 +42,93 @@ COO_Format get_COO_transpose(MatrixContainer Matrix1)
     for (i=0 ; i<size; i++){
       row_indices[i] = COO_Matrix.column_indices[i];
       column_indices[i] = COO_Matrix.row_indices[i];
-      values = old_values[i];
+      values[i] = old_values[i];
     }
     //print_int_array(row_indices,size, "new rown");
     //print_int_array(column_indices,size, "new column");
     //BUBBLE SORT TO ROW MAJOR ORDER
-    for (i = 0; i < size-1; i++) {
-      // Last i elements are already in place
-      for (j = 0; j < size-i-1; j++) {
 
-        if (row_indices[j] > row_indices[j+1]) {
-          int_swap(&column_indices[j], &column_indices[j+1]);
-          int_swap(&row_indices[j], &row_indices[j+1]);
-          int_swap(&values[j], &values[j+1]);
-
-        } else if (row_indices[j] == row_indices[j+1] && (column_indices[j] > column_indices[j+1])) {
-          int_swap(&column_indices[j], &column_indices[j+1]);
-          int_swap(&row_indices[j], &row_indices[j+1]);
-          int_swap(&values[j], &values[j+1]);
+    for(i=0;i<size;i++)
+    {
+      #pragma omp parallel
+      {
+        #pragma omp for
+        for(j = 0; j < size - 1; j = j + 2)
+        {
+          if(row_indices[j] > row_indices[j+1] )
+          {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            int_swap(&values[j], &values[j+1]);
+          } else if (row_indices[j] == row_indices[j+1] && (column_indices[j] > column_indices[j+1])) {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            int_swap(&values[j], &values[j+1]);
+          }
+        }
+        #pragma omp for
+        for(j = 1; j < size - 1; j = j + 2)
+        {
+          if( row_indices[j] > row_indices[j+1] )
+          {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            int_swap(&values[j], &values[j+1]);
+          } else if (row_indices[j] == row_indices[j+1] && (column_indices[j] > column_indices[j+1])) {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            int_swap(&values[j], &values[j+1]);
+          }
         }
       }
     }
     Result.values = values;
     //print_int_array(values,size, "new2 values");
+
   } else {
     //FLOATS
+
     float * old_values = (float*)COO_Matrix.values;
 
     for (i=0 ; i<size; i++){
       row_indices[i] = COO_Matrix.column_indices[i];
       column_indices[i] = COO_Matrix.row_indices[i];
-      float_values = old_values[i];
+      float_values[i] = old_values[i];
     }
     //print_int_array(row_indices,size, "new rown");
     //print_int_array(column_indices,size, "new column");
     //BUBBLE SORT TO ROW MAJOR ORDER
-    for (i = 0; i < size-1; i++) {
-      // Last i elements are already in place
-      for (j = 0; j < size-i-1; j++) {
-
-        if (row_indices[j] > row_indices[j+1]) {
-          int_swap(&column_indices[j], &column_indices[j+1]);
-          int_swap(&row_indices[j], &row_indices[j+1]);
-          float_swap(&float_values[j], &float_values[j+1]);
-
-        } else if (row_indices[j] == row_indices[j+1] && (column_indices[j] > column_indices[j+1])) {
-          int_swap(&column_indices[j], &column_indices[j+1]);
-          int_swap(&row_indices[j], &row_indices[j+1]);
-          float_swap(&float_values[j], &float_values[j+1]);
+    for(i=0;i<size;i++)
+    {
+      #pragma omp parallel
+      {
+        #pragma omp for
+        for(j = 0; j < size - 1; j = j + 2)
+        {
+          if(row_indices[j] > row_indices[j+1] )
+          {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            float_swap(&float_values[j], &float_values[j+1]);
+          } else if (row_indices[j] == row_indices[j+1] && (column_indices[j] > column_indices[j+1])) {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            float_swap(&float_values[j], &float_values[j+1]);
+          }
+        }
+        #pragma omp for
+        for(j = 1; j < size - 1; j = j + 2)
+        {
+          if( row_indices[j] > row_indices[j+1] )
+          {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            float_swap(&float_values[j], &float_values[j+1]);
+          } else if (row_indices[j] == row_indices[j+1] && (column_indices[j] > column_indices[j+1])) {
+            int_swap(&column_indices[j], &column_indices[j+1]);
+            int_swap(&row_indices[j], &row_indices[j+1]);
+            float_swap(&float_values[j], &float_values[j+1]);
+          }
         }
       }
     }
@@ -106,9 +144,8 @@ COO_Format get_COO_transpose(MatrixContainer Matrix1)
   //print_int_array(Result.row_indices, size, "rows");
 
 
-  t = clock() - t;
-  double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+  double time_taken = omp_get_wtime() - t;
   Result.time = time_taken;
-  printf("Time: %f\n",Result.time);
+  //printf("Time: %f\n",Result.time);
   return Result;
 }

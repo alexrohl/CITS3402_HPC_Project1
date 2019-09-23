@@ -8,8 +8,8 @@
 /*Note we will always be returning a float result*/
 CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
 {
-  clock_t t;
-  t = clock();
+  double t;
+  t = omp_get_wtime();
 
   CSR_Format CSR_Matrix = Matrix.CSR_Matrix;
   CSR_Format Result;
@@ -66,8 +66,7 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
   //print_float_array(Result.NNZ, Result.lenNNZ, "NNZ");
 
 
-  t = clock() - t;
-  double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+  double time_taken = omp_get_wtime() - t;
   Result.time = time_taken;
   printf("Time: %f\n",Result.time);
 

@@ -34,8 +34,7 @@ typedef struct COO_Matrix COO_Format;
 COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
 {
     COO_Format parsed_matrix;
-    clock_t t;
-    t = clock();
+    double t = omp_get_wtime();
 
     FILE *fp = fopen(filename, "r"); /* should check the result */
     char type[MAX_LINE_LEN];
@@ -127,8 +126,7 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
     free(column_indices);
     free(row_indices);
     */
-    t = clock() - t;
-    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+    double time_taken = omp_get_wtime() - t;
     parsed_matrix.time = time_taken;
     printf("Time: %f\n",parsed_matrix.time);
     return parsed_matrix;

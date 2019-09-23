@@ -42,12 +42,33 @@ struct CSR_Matrix {
 
 typedef struct CSR_Matrix CSR_Format;
 
+struct CSC_Matrix {
+    int lenNNZ;
+    void *NNZ;
+    int *IA;
+    int *JA;
+    double time;
+};
+
+typedef struct CSC_Matrix CSC_Format;
+
+struct MatrixContainer {
+    int isInt;
+    int n_rows;
+    int m_columns;
+    COO_Format COO_Matrix;
+    CSR_Format CSR_Matrix;
+    CSC_Format CSC_Matrix;
+};
+
+typedef struct MatrixContainer MatrixContainer;
+
 
 CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
 {
     CSR_Format parsed_matrix;
-    clock_t t;
-    t = clock();
+    double t;
+    t = omp_get_wtime();
 
     FILE *fp = fopen(filename, "r"); /* should check the result */
     char type[MAX_LINE_LEN];
@@ -139,11 +160,10 @@ CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
     parsed_matrix.lenNNZ = non_zero_counter;
     parsed_matrix.IA = IA;
     parsed_matrix.JA = JA;
-    //print_int_array(parsed_matrix.IA, n, "IA");
+    //print_int_array(parsed_matrix.IA, n+1, "IA");
     //print_int_array(parsed_matrix.JA, non_zero_counter, "JA");
 
-    t = clock() - t;
-    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+    double time_taken = omp_get_wtime() - t;
     parsed_matrix.time = time_taken;
     printf("Time: %f\n",parsed_matrix.time);
     return parsed_matrix;

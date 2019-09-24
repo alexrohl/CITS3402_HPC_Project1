@@ -68,7 +68,6 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
     //FOR INTEGERS
 
     if (isInt) {
-      printf("Building integer COO matrix\n");
       int i_elem;
 
       for (i=0; i<n; i++) {
@@ -89,7 +88,6 @@ COO_Format get_COO_Matrix(char *filename, int isInt, int n, int m)
       //print_int_array(parsed_matrix.values, non_zero_counter, "values");
     } else {
       //FOR FLOATS
-      printf("Building float COO matrix\n");
       float f_elem;
 
       for (i=0; i<n; i++) {

@@ -9,13 +9,13 @@ const int false = 0;
 
 #include"parse_COO.c"
 #include"parse_CSR.c"
-#include"COO_transpose.c" //needed to parse CSC...
-#include"parse_CSC.c"
+#include"parse_CSC2.c"
 
 #include"build_matrix_container.c"
 
 #include"CSR_scalar.c"
 #include"CSR_trace.c"
+#include"COO_transpose.c"
 #include"CSR_addition.c"
 #include"COO_addition.c"
 #include"CSR_CSC_multiply.c"
@@ -158,6 +158,8 @@ int main(int argc,char* argv[])
         fprintf(fp,"%f\n",COOres.time);
 
       }
+
+      //ADDITION
       else if (strncmp(operation,"ad",2)==0) {
         CSR_Format CSRres = get_CSR_Addition(matrix_container1, matrix_container2);
         fprintf(fp, "ad\n");
@@ -168,31 +170,28 @@ int main(int argc,char* argv[])
         fprintf(fp,"%f\n",matrix_container1.CSR_Matrix.time+matrix_container2.CSR_Matrix.time);
         fprintf(fp,"%f\n",CSRres.time);
       }
-      else if (strncmp(operation,"mm",2)==0) {
-        CSR_Format CSRres = get_CSR_CSC_multiply(matrix_container1, matrix_container2);
 
+      //MULTIPLICATION
+      else if (strncmp(operation,"mm",2)==0) {
+        printf("Computing Matrix Multiplication\n");
+        CSR_Format CSRres = get_CSR_CSC_multiply(matrix_container1, matrix_container2);
+        print_int_array(CSRres.IA, matrix_container1.n_rows+1, "inMAIN_IA");
+        print_int_array(CSRres.JA, CSRres.lenNNZ, "inMAIN_JA");
+        if (matrix_container1.isInt==1) {
+          print_int_array((int*)CSRres.NNZ, CSRres.lenNNZ, "intMAINNNZ");
+        } else {
+          print_float_array((float*)CSRres.NNZ, CSRres.lenNNZ, "inMAINNNZ");
+        }
+        fprintf(fp,"mm\n");
+        fprintf(fp,"%s\n",matrix_container1.name);
+        fprintf(fp,"%s\n",matrix_container2.name);
+        fprintf(fp, "%d\n",num_threads);
+        fp = CSR_Print(fp, CSRres, matrix_container1.n_rows, matrix_container1.m_columns, matrix_container1.isInt);
+        fprintf(fp,"%f\n",matrix_container1.CSR_Matrix.time+matrix_container2.CSR_Matrix.time);
+        fprintf(fp,"%f\n",CSRres.time);
       }
 
-
       fclose(fp);
-      //COO_Format res = get_COO_transpose(matrix_container1,16);
-      //CSR_Format res = get_CSR_scalar(matrix_container1,3.141592,4);
-      //int res = get_int_trace(matrix_container1,16);
-      //CSR_Format res = get_CSR_Addition(get_type("int1.in"),get_type("int2.in"));
-      //CSR_Format res1 = get_CSR_CSC_multiply(matrix_container1, matrix_container2);
-
-
-      /*
-      struct MatrixType MatrixType1 = get_array(argv[1]);
-      MatrixType1.COO_Matrix = get_COO_Matrix(argv[1]);
-      struct MatrixType MatrixType2 = get_array("int3.in");
-      MatrixType2.COO_Matrix = get_COO_Matrix("int3.in");
-      int trace = get_int_trace(MatrixType1.matrix);
-      CSRformat added_Matrix = get_addition(MatrixType1.matrix,MatrixType2.matrix);
-      COO_Format added_Matrix2 = get_COO_addition(MatrixType1.COO_Matrix,MatrixType2.COO_Matrix);
-
-      printf("Trace: %d\n",trace);
-      */
     }
     printf("DONE\n");
     return 0;

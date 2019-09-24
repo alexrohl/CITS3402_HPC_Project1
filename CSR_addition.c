@@ -71,94 +71,184 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
   float * fltNNZ2 = (float*)CSR_Matrix2.NNZ;
 
   //Build resulting matrix
-  int element_to_add,index_to_add;
+  int index_to_add;
 
   //loops through each row in M1 and M2
   int i;
-  for(i=0; i<Matrix1.n_rows; i++) {
-    IA_index++;
-    printf("row: %d\n",i);
+  if (Matrix1.isInt==1) {//INTEGERS
+    int element_to_add;
+    for(i=0; i<Matrix1.n_rows; i++) {
+      IA_index++;
+      printf("row: %d\n",i);
 
-    int first1 = CSR_Matrix1.IA[i];
-    int last1 = CSR_Matrix1.IA[i+1];
-    int first2 = CSR_Matrix2.IA[i];
-    int last2 = CSR_Matrix2.IA[i+1];
+      int first1 = CSR_Matrix1.IA[i];
+      int last1 = CSR_Matrix1.IA[i+1];
+      int first2 = CSR_Matrix2.IA[i];
+      int last2 = CSR_Matrix2.IA[i+1];
 
-    int j1 = first1;
-    int j2 = first2;
+      int j1 = first1;
+      int j2 = first2;
 
-    while (true) {
-      int column_index1 = CSR_Matrix1.JA[j1];
-      int column_index2 = CSR_Matrix2.JA[j2];
-      //If matrix1 is spent, add matrix2 remaining elements to Result
-      if (j1 == last1) {
-        for(j2=j2;j2<last2;j2++) {
-          printf("here j2:%d last: %d\n",j2,last2);
-          element_to_add = intNNZ2[j2];
-          index_to_add = CSR_Matrix2.JA[j2];
+      while (true) {
+        int column_index1 = CSR_Matrix1.JA[j1];
+        int column_index2 = CSR_Matrix2.JA[j2];
+        //If matrix1 is spent, add matrix2 remaining elements to Result
+        if (j1 == last1) {
+          for(j2=j2;j2<last2;j2++) {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = intNNZ2[j2];
+            index_to_add = CSR_Matrix2.JA[j2];
 
-          NNZ[non_zero_counter]=element_to_add;
-          JA[non_zero_counter]=index_to_add;
+            NNZ[non_zero_counter]=element_to_add;
+            JA[non_zero_counter]=index_to_add;
 
-          non_zero_counter++;
-          elements_in_row_counter++;
+            non_zero_counter++;
+            elements_in_row_counter++;
+          }
+          break;
         }
-        break;
-      }
 
-      //else matrix2 is spent, add matrix1 remaining elements to Results
-      if (j2 == last2) {
-        for(j1=j1;j1<last1;j1++) {
-          printf("here j1:%d last: %d\n",j1,last1);
-          element_to_add = intNNZ1[j1];
-          index_to_add = CSR_Matrix1.JA[j1];
+        //else matrix2 is spent, add matrix1 remaining elements to Results
+        if (j2 == last2) {
+          for(j1=j1;j1<last1;j1++) {
+            printf("here j1:%d last: %d\n",j1,last1);
+            element_to_add = intNNZ1[j1];
+            index_to_add = CSR_Matrix1.JA[j1];
 
-          NNZ[non_zero_counter]=element_to_add;
-          JA[non_zero_counter]=index_to_add;
+            NNZ[non_zero_counter]=element_to_add;
+            JA[non_zero_counter]=index_to_add;
 
-          non_zero_counter++;
-          elements_in_row_counter++;
-        }
-        break;
-      } else {
-
-        //If index1 is smaller
-        if (column_index1 < column_index2) {
-          printf("here j2:%d last: %d\n",j2,last2);
-          element_to_add = intNNZ1[j1];
-          index_to_add = column_index1;
-          j1++;
-
-        //If index2 is smaller
-        } else if (column_index2 < column_index1) {
-          printf("here j2:%d last: %d\n",j2,last2);
-          element_to_add = intNNZ2[j2];
-          index_to_add = column_index2;
-          j2++;
-
-        //if indexs are the same
+            non_zero_counter++;
+            elements_in_row_counter++;
+          }
+          break;
         } else {
-          printf("here j2:%d last: %d\n",j2,last2);
-          element_to_add = intNNZ1[j1] + intNNZ2[j2];
-          index_to_add = column_index1;
-          j1++;
-          j2++;
+
+          //If index1 is smaller
+          if (column_index1 < column_index2) {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = intNNZ1[j1];
+            index_to_add = column_index1;
+            j1++;
+
+          //If index2 is smaller
+          } else if (column_index2 < column_index1) {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = intNNZ2[j2];
+            index_to_add = column_index2;
+            j2++;
+
+          //if indexs are the same
+          } else {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = intNNZ1[j1] + intNNZ2[j2];
+            index_to_add = column_index1;
+            j1++;
+            j2++;
+          }
+
+          NNZ[non_zero_counter]=element_to_add;
+          JA[non_zero_counter]=index_to_add;
+
+          non_zero_counter++;
+          elements_in_row_counter++;
+
+        }
+      }
+      //append number_of_elements in row to result
+      IA[IA_index]=elements_in_row_counter;
+
+    }
+    Result.NNZ = NNZ;
+  }
+  else { //FLOATS
+    float element_to_add;
+    for(i=0; i<Matrix1.n_rows; i++) {
+      IA_index++;
+      printf("row: %d\n",i);
+
+      int first1 = CSR_Matrix1.IA[i];
+      int last1 = CSR_Matrix1.IA[i+1];
+      int first2 = CSR_Matrix2.IA[i];
+      int last2 = CSR_Matrix2.IA[i+1];
+
+      int j1 = first1;
+      int j2 = first2;
+
+      while (true) {
+        int column_index1 = CSR_Matrix1.JA[j1];
+        int column_index2 = CSR_Matrix2.JA[j2];
+        //If matrix1 is spent, add matrix2 remaining elements to Result
+        if (j1 == last1) {
+          for(j2=j2;j2<last2;j2++) {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = fltNNZ2[j2];
+            index_to_add = CSR_Matrix2.JA[j2];
+
+            float_NNZ[non_zero_counter]=element_to_add;
+            JA[non_zero_counter]=index_to_add;
+
+            non_zero_counter++;
+            elements_in_row_counter++;
+          }
+          break;
         }
 
-        NNZ[non_zero_counter]=element_to_add;
-        JA[non_zero_counter]=index_to_add;
+        //else matrix2 is spent, add matrix1 remaining elements to Results
+        if (j2 == last2) {
+          for(j1=j1;j1<last1;j1++) {
+            printf("here j1:%d last: %d\n",j1,last1);
+            element_to_add = fltNNZ1[j1];
+            index_to_add = CSR_Matrix1.JA[j1];
 
-        non_zero_counter++;
-        elements_in_row_counter++;
+            float_NNZ[non_zero_counter]=element_to_add;
+            JA[non_zero_counter]=index_to_add;
 
+            non_zero_counter++;
+            elements_in_row_counter++;
+          }
+          break;
+        } else {
+
+          //If index1 is smaller
+          if (column_index1 < column_index2) {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = fltNNZ1[j1];
+            index_to_add = column_index1;
+            j1++;
+
+          //If index2 is smaller
+          } else if (column_index2 < column_index1) {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = fltNNZ2[j2];
+            index_to_add = column_index2;
+            j2++;
+
+          //if indexs are the same
+          } else {
+            printf("here j2:%d last: %d\n",j2,last2);
+            element_to_add = fltNNZ1[j1] + fltNNZ2[j2];
+            index_to_add = column_index1;
+            j1++;
+            j2++;
+          }
+
+          float_NNZ[non_zero_counter]=element_to_add;
+          JA[non_zero_counter]=index_to_add;
+
+          non_zero_counter++;
+          elements_in_row_counter++;
+
+        }
       }
-    }
-    //append number_of_elements in row to result
-    IA[IA_index]=elements_in_row_counter;
+      //append number_of_elements in row to result
+      IA[IA_index]=elements_in_row_counter;
 
+    }
+    Result.NNZ = float_NNZ;
   }
+
   Result.lenNNZ = non_zero_counter;
-  Result.NNZ = NNZ;
   Result.IA = IA;
   Result.JA = JA;
 

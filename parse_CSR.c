@@ -42,29 +42,6 @@ struct CSR_Matrix {
 
 typedef struct CSR_Matrix CSR_Format;
 
-struct CSC_Matrix {
-    int lenNNZ;
-    void *NNZ;
-    int *IA;
-    int *JA;
-    double time;
-};
-
-typedef struct CSC_Matrix CSC_Format;
-
-struct MatrixContainer {
-    char name[50];
-    int isInt;
-    int n_rows;
-    int m_columns;
-    COO_Format COO_Matrix;
-    CSR_Format CSR_Matrix;
-    CSC_Format CSC_Matrix;
-};
-
-typedef struct MatrixContainer MatrixContainer;
-
-
 CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
 {
     CSR_Format parsed_matrix;
@@ -107,7 +84,7 @@ CSR_Format get_CSR_Matrix(char *filename, int isInt, int n, int m)
     IA = append_int_to_array(temp, IA, elements_in_row_counter, IA_index);
     IA_index++;
 
-    if (isInt) {
+    if (isInt==1) {
       for (i=0; i<n; i++) {
         for (j=0; j<m; j++) {
           /* i is our row index*/

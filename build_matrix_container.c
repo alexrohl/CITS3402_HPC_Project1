@@ -16,8 +16,9 @@
 
 
 #define MAX_LINE_LEN 256
-/*
+
 struct MatrixContainer {
+    char name[50];
     int isInt;
     int n_rows;
     int m_columns;
@@ -27,7 +28,6 @@ struct MatrixContainer {
 };
 
 typedef struct MatrixContainer MatrixContainer;
-*/
 
 MatrixContainer get_type(char *filename)
 {
@@ -69,8 +69,9 @@ MatrixContainer get_type(char *filename)
     Result.CSR_Matrix = get_CSR_Matrix(filename,is_int,n,m);
 
     printf("Building CSC_matrix for %s\n",filename);
-    Result.CSC_Matrix = get_CSC_Matrix(get_COO_transpose(Result,1),is_int,n,m);
-
+    printf("here2");
+    Result.CSC_Matrix = get_CSC_Matrix(filename,is_int,n,m);
+    printf("here2");
 
 
     return Result;

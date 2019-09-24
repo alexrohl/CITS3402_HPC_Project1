@@ -66,6 +66,10 @@ CSR_Format get_CSR_Addition(MatrixContainer Matrix1, MatrixContainer Matrix2)
   int * intNNZ1 = (int*)CSR_Matrix1.NNZ;
   int * intNNZ2 = (int*)CSR_Matrix2.NNZ;
 
+  //Get float values
+  float * fltNNZ1 = (float*)CSR_Matrix1.NNZ;
+  float * fltNNZ2 = (float*)CSR_Matrix2.NNZ;
+
   //Build resulting matrix
   int element_to_add,index_to_add;
 

@@ -10,6 +10,7 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
 {
   double t;
   t = omp_get_wtime();
+  printf("Multiplying by %f\n",scalar);
 
   CSR_Format CSR_Matrix = Matrix.CSR_Matrix;
   CSR_Format Result;
@@ -17,18 +18,20 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
   int i;
   int j;
 
-  /* values: The non-zero values stored in row-major order */
-  float float_NNZ[CSR_Matrix.lenNNZ];
-  /*BUILD IA = [0, 1, 3, 3] the number of elements in each row */
-  int IA[Matrix.n_rows];
-  /*BUILD JA: Stores the column index of each non-zero element. */
-  int JA[CSR_Matrix.lenNNZ];
+  int *IA,*JA;
+  float *float_NNZ;
 
+  /* NNZ: The non-zero values stored in row-major order */
+  float_NNZ = malloc(CSR_Matrix.lenNNZ*sizeof(float));
+  /*BUILD IA = [0, 1, 3, 3] the number of elements in each row */
+  IA = malloc((Matrix.n_rows+1)*sizeof(int));
+  /*BUILD JA: Stores the column index of each non-zero element. */
+  JA = malloc(CSR_Matrix.lenNNZ*sizeof(int));
   //rebuild IA_index
   omp_set_num_threads(num_threads); //I have set the number of threads =4, you can change this.
   #pragma omp parallel
   {
-    for (i=0;i<Matrix.n_rows;i++) {
+    for (i=0;i<Matrix.n_rows+1;i++) {
       IA[i] = CSR_Matrix.IA[i];
     }
   }
@@ -38,7 +41,7 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
     {
       #pragma omp for
       for (i=0;i<CSR_Matrix.lenNNZ;i++) {
-        JA[i] = CSR_Matrix.IA[i];
+        JA[i] = CSR_Matrix.JA[i];
         float new_val = old_values[i]*scalar;
         float_NNZ[i] = new_val;
       }
@@ -51,7 +54,7 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
     {
       #pragma omp for
       for (i=0;i<CSR_Matrix.lenNNZ;i++) {
-        JA[i] = CSR_Matrix.IA[i];
+        JA[i] = CSR_Matrix.JA[i];
         float new_val = old_values[i]*scalar;
         float_NNZ[i] = new_val;
       }
@@ -61,9 +64,9 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
   Result.IA = IA;
   Result.JA = JA;
   Result.NNZ = float_NNZ;
-  //print_int_array(Result.IA, Matrix.n_rows, "IA");
-  //print_int_array(Result.JA, Result.lenNNZ, "JA");
-  //print_float_array(Result.NNZ, Result.lenNNZ, "NNZ");
+  print_int_array(Result.IA, Matrix.n_rows+1, "IA");
+  print_int_array(Result.JA, Result.lenNNZ, "JA");
+  print_float_array(Result.NNZ, Result.lenNNZ, "NNZ");
 
 
   double time_taken = omp_get_wtime() - t;
@@ -71,5 +74,4 @@ CSR_Format get_CSR_scalar(MatrixContainer Matrix, float scalar, int num_threads)
   printf("Time: %f\n",Result.time);
 
   return Result;
-
 }

@@ -142,7 +142,7 @@ COO_Format get_COO_transpose(MatrixContainer Matrix1,int num_threads)
 
   //print_int_array(Result.column_indices , size, "column");
   //print_int_array(Result.row_indices, size, "rows");
-
+  printf("num:%d\n",num_threads);
 
   double time_taken = omp_get_wtime() - t;
   Result.time = time_taken;

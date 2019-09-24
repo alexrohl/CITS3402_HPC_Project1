@@ -53,6 +53,7 @@ struct CSC_Matrix {
 typedef struct CSC_Matrix CSC_Format;
 
 struct MatrixContainer {
+    char name[50];
     int isInt;
     int n_rows;
     int m_columns;
